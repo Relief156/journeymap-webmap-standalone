@@ -32,18 +32,6 @@ configurations.all {
     resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
 }
 
-dependencies {
-    annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
-    implementation group: "info.journeymap", name: "journeymap-api-neoforge", version: "${project.journeymap_api_version}-${project.minecraft_version}-SNAPSHOT", changing: true
-    implementation group: 'io.javalin', name: 'javalin', version: project.javalin_version
-
-    shade group: 'info.journeymap', name: 'webmap-client', version: project.journeymap_webmap_version, changing: true
-
-    //external libs shade
-    shade group: 'io.javalin', name: 'javalin', version: project.javalin_version
-    compileOnly project(":Common")
-}
-
 neoForge {
     version = neoforge_version
     // Automatically enable neoforge AccessTransformers if the file exists
@@ -71,6 +59,19 @@ neoForge {
             sourceSet sourceSets.main
         }
     }
+}
+
+dependencies {
+    annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
+    implementation group: "info.journeymap", name: "journeymap-api-neoforge", version: "${project.journeymap_api_version}-${project.minecraft_version}-SNAPSHOT", changing: true
+    implementation group: 'io.javalin', name: 'javalin', version: project.javalin_version
+    additionalRuntimeClasspath group: 'io.javalin', name: 'javalin', version: project.javalin_version
+
+    shade group: 'info.journeymap', name: 'webmap-client', version: project.journeymap_webmap_version, changing: true
+
+    //external libs shade
+    shade group: 'io.javalin', name: 'javalin', version: project.javalin_version
+    compileOnly project(":Common")
 }
 
 tasks.assemble.dependsOn shadowJar
