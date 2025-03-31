@@ -51,6 +51,8 @@ minecraft.reobf = false
 dependencies {
     minecraft "net.minecraftforge:forge:${project.minecraft_version}-${project.forge_version}"
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
+    implementation("net.sf.jopt-simple:jopt-simple:5.0.4") { version { strictly "5.0.4" } }
+
     compileOnly group: 'info.journeymap', name: 'journeymap-api-forge', version: "${project.journeymap_api_version}-${project.minecraft_version}-SNAPSHOT", changing: true
 //    implementation fg.deobf("curse.maven:journeymap-32274:${project.journeymap_forge_version}")
 
@@ -61,6 +63,7 @@ dependencies {
 //    shade group: 'javax.servlet', name: 'javax.servlet-api', version: '4.0.1'
     shade group: 'org.jetbrains.kotlin', name: 'kotlin-stdlib', version: '1.9.23'
     shade group: 'io.javalin', name: 'javalin', version: project.javalin_version
+
 //    shade group: 'org.slf4j', name: 'slf4j-simple', version: '2.0.3'
     testCompileOnly group: 'info.journeymap', name: 'journeymap-api-forge', version: "${project.journeymap_api_version}-${project.minecraft_version}-SNAPSHOT", changing: true
 
@@ -72,23 +75,26 @@ mixin {
 }
 
 minecraft {
+//    mappings channel: project.mappings_channel, version: "${project.mappings_date}-${project.mappings_mc_version}"
     mappings channel: "official", version: "${project.minecraft_version}"
 
-//    mappings channel: project.mappings_channel, version: "${project.parchment_mappings}-${project.mappings}"
-    accessTransformer = file("src/main/resources/META-INF/accesstransformer.cfg")
+    copyIdeResources = true //Calls processResources when in dev
+
+    if (file("src/main/resources/META-INF/accesstransformer.cfg").exists()) {
+        accessTransformer = file("src/main/resources/META-INF/accesstransformer.cfg")
+    }
+
     runs {
         client = {
-            arg "--mixin=journeymap.mixins.json"
             // needed for deps with mixins.
-//            properties 'mixin.env.disableRefMap': 'true'
-            property 'mixin.debug.export', 'true'
-            property 'mixin.env.remapRefMap', 'true'
-            property 'mixin.env.refMapRemappingFile', "${buildDir}/createSrgToMcp/output.srg"
-            properties 'forge.logging.console.level': 'info'
-            properties 'journeymap.map_testing': 'true'
+            property "mixin.debug.export", "true"
+            property "mixin.env.remapRefMap", "true"
+            property "mixin.env.refMapRemappingFile", "${buildDir}/createSrgToMcp/output.srg"
+            properties "forge.logging.console.level": "info"
+            properties "journeymap.map_testing": "true"
 
-            properties 'forge.logging.markers': 'SCAN,REGISTRIES,REGISTRYDUMP'
-            workingDirectory project.file('run/forge/client')
+
+            workingDirectory project.file("run/client")
             mods {
                 modClientRun {
                     source sourceSets.main
@@ -97,32 +103,16 @@ minecraft {
             }
         }
         server = {
-            arg 'nogui'
-            arg "--mixin=journeymap.mixins.json"
-
-            property 'mixin.debug.export', 'true'
-            property 'mixin.env.remapRefMap', 'true'
-            property 'mixin.env.refMapRemappingFile', "${buildDir}/createSrgToMcp/output.srg"
-            properties 'forge.logging.console.level': 'info'
-            properties 'mixin.env.disableRefMap': 'true'
-            properties 'forge.logging.markers': 'SCAN,REGISTRIES,REGISTRYDUMP'
-            workingDirectory project.file('run/forge/server')
+            arg "nogui"
+            property "mixin.debug.export", "true"
+            property "mixin.env.remapRefMap", "true"
+            property "mixin.env.refMapRemappingFile", "${buildDir}/createSrgToMcp/output.srg"
+            properties "forge.logging.console.level": "info"
+            properties "mixin.env.disableRefMap": "true"
+            properties "forge.logging.markers": "SCAN,REGISTRIES,REGISTRYDUMP"
+            workingDirectory project.file("run/server")
             mods {
-                modServerRun   {
-                    source sourceSets.main
-                    source project(":Common").sourceSets.main
-                }
-            }
-        }
-        data {
-//            args '--mixin.config', 'journeymap.mixins.json'
-
-            workingDirectory project.file('game_test')
-            property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
-            property 'forge.logging.console.level', 'debug'
-            args '--mod', 'journeymap', '--all', '--output', file('src/generated/resources/')
-            mods {
-                modDataRun   {
+                modServerRun {
                     source sourceSets.main
                     source project(":Common").sourceSets.main
                 }
