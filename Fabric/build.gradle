@@ -76,13 +76,11 @@ dependencies {
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
     mappings loom.layered() {
         officialMojangMappings()
-//        parchment("org.parchmentmc.data:parchment-${project.mappings_mc_version}:${project.parchment_mappings}@zip")
     }
 
     modCompileOnly group: 'info.journeymap', name: 'journeymap-api-fabric', version: "${project.journeymap_api_version}-${project.minecraft_version}-SNAPSHOT", changing: true
     modImplementation "net.fabricmc:fabric-loader:${project.fabric_loader_version}"
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
-//    modImplementation "curse.maven:journeymap-32274:${project.jourenymap_fabric_version}"
     compileOnly project(":Common")
 
     implementation include(group: 'info.journeymap', name: 'webmap-client', version: project.journeymap_webmap_version, changing: true)
@@ -100,8 +98,6 @@ dependencies {
     compileOnly include(group: 'jakarta.servlet', name: 'jakarta.servlet-api', version: '6.1.0')
     compileOnly include(group: 'org.eclipse.jetty.toolchain', name: 'jetty-jakarta-servlet-api', version: '5.0.2')
 
-    compileOnly include(group: 'org.jetbrains.kotlin', name: 'kotlin-stdlib', version: '1.9.25')
-
 //    compileOnly include (group: 'org.slf4j', name: 'slf4j-simple', version: '2.0.3')
 }
 
@@ -117,20 +113,16 @@ loom {
             client()
             setConfigName("Fabric Client")
             ideConfigGenerated(true)
-            runDir("run/fabric/client")
+            runDir("run/client")
             programArg("--username=Dev")
         }
         server {
             server()
             setConfigName("Fabric Server")
             ideConfigGenerated(true)
-            runDir("run/fabric/server")
+            runDir("run/server")
         }
     }
-}
-
-sourceSets {
-    main.kotlin.srcDirs = ['src/main/java', 'src/main/kotlin']
 }
 
 remapJar {

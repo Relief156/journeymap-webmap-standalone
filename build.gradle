@@ -1,11 +1,5 @@
-buildscript {
-    dependencies {
-        classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.20'
-    }
-}
-
 plugins {
-    id 'net.neoforged.moddev' version '0.1.112' apply false
+    id 'net.neoforged.moddev' version '2.0.80' apply false
 }
 
 configurations.all {
@@ -15,13 +9,7 @@ configurations.all {
 
 subprojects {
     apply plugin: 'java'
-    apply plugin: 'org.jetbrains.kotlin.jvm'
-    apply plugin: 'kotlin'
 
-
-    sourceSets {
-        main.kotlin.srcDirs = ['src/main/java', 'src/main/kotlin']
-    }
     sourceSets.main.resources { srcDir 'src/generated/resources' }
 
     java.toolchain.languageVersion = JavaLanguageVersion.of(21)
@@ -73,18 +61,14 @@ subprojects {
     dependencies {
         implementation group: 'info.journeymap', name: 'webmap-client', version: project.journeymap_webmap_version, changing: true
         compileOnly "curse.maven:journeymap-32274:${project.journeymap_forge_version}"
-//        implementation "ignored:journeymap-forge:1.21.1-6.0.0-beta.27"
         // for annotations
         implementation group: 'com.google.code.findbugs', name: 'jsr305', version: '3.0.1'
 
         // external libs
 //        implementation 'org.slf4j:slf4j-api:2.0.16'
         implementation group: 'javax.servlet', name: 'javax.servlet-api', version: '4.0.1'
-        implementation group: 'org.jetbrains.kotlin', name: 'kotlin-stdlib', version: '1.9.20'
         implementation group: 'io.javalin', name: 'javalin', version: project.javalin_version
         testImplementation "curse.maven:journeymap-32274:${project.journeymap_forge_version}"
-//        testImplementation "ignored:journeymap-forge:1.21.1-6.0.0-beta.27"
-
     }
 
     plugins.withType(JavaPlugin) {
@@ -97,15 +81,6 @@ subprojects {
     tasks.withType(JavaCompile).configureEach {
         it.options.encoding = 'UTF-8'
         it.options.release = 21
-    }
-
-    compileKotlin {
-        source(project(":Common").sourceSets.main.allSource)
-        inputs.file "../gradle.properties"
-        kotlinOptions {
-            jvmTarget = "21"
-            freeCompilerArgs += "-Xopt-in=kotlin.RequiresOptIn"
-        }
     }
 
     // Disables Gradle's custom module metadata from being published to maven. The

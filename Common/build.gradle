@@ -26,13 +26,9 @@ neoForge {
     // https://github.com/neoforged/FancyModLoader/blob/a952595eaaddd571fbc53f43847680b00894e0c1/loader/src/main/java/net/neoforged/fml/loading/moddiscovery/ModFile.java#L118
     def at = file('src/main/resources/META-INF/accesstransformer.cfg')
     if (at.exists()) {
-        accessTransformers.add(at.absolutePath)
+        accessTransformers.from(at.absolutePath)
     }
     addModdingDependenciesTo(sourceSets["test"])
-//    parchment {
-//        minecraftVersion = mappings_mc_version
-//        mappingsVersion = mappings_date
-//    }
 }
 
 dependencies {
@@ -42,6 +38,7 @@ dependencies {
     compileOnly group: 'info.journeymap', name: 'journeymap-api-common', version: "${project.journeymap_api_version}-${project.minecraft_version}-SNAPSHOT", changing: true
     // for annotations
     implementation group: 'com.google.code.findbugs', name: 'jsr305', version: '3.0.1'
+    implementation group: 'io.javalin', name: 'javalin', version: project.javalin_version
 }
 
 task processDocs(type: Copy) {
