@@ -1,6 +1,5 @@
 package journeymap_webmap.routes;
 
-import com.mojang.blaze3d.platform.NativeImage;
 import io.javalin.http.ContentType;
 import io.javalin.http.Context;
 import journeymap.client.texture.TextureCache;
@@ -14,19 +13,23 @@ public class Waypoints
     {
         String id = ctx.pathParam("id");
 
-        NativeImage img = TextureCache.getColorizedWaypointIcon(id).getPixels();
+        var img = TextureCache.getColorizedWaypointIcon(id);
 
-        if (img != null && img.pixels > 0)
+        if (img != null)
         {
-            try (var channel = Channels.newChannel(ctx.outputStream()))
+            var nativeImage = img.getPixels();
+            if (nativeImage != null && nativeImage.pixels > 0)
             {
-                ctx.contentType(ContentType.IMAGE_PNG);
-                img.writeToChannel(channel);
-                ctx.outputStream().flush();
-            }
-            catch (IOException e)
-            {
-                // nothing
+                try (var channel = Channels.newChannel(ctx.outputStream()))
+                {
+                    ctx.contentType(ContentType.IMAGE_PNG);
+                    nativeImage.writeToChannel(channel);
+                    ctx.outputStream().flush();
+                }
+                catch (IOException e)
+                {
+                    // nothing
+                }
             }
         }
     }

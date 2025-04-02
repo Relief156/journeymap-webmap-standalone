@@ -21,7 +21,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.ServerSocket;
 
-import static journeymap.common.Journeymap.MOD_ID;
+import static journeymap_webmap.Constants.MOD_ID;
 
 public class WebMap
 {
