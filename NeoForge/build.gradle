@@ -2,6 +2,7 @@ buildscript {
     dependencies {
         classpath("io.github.goooler.shadow:shadow-gradle-plugin:8.1.7")
         classpath group: 'com.modrinth.minotaur', name: 'Minotaur', version: '2.+'
+        classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:2.1.20'
     }
 }
 
@@ -15,6 +16,8 @@ plugins {
 }
 
 apply plugin: 'io.github.goooler.shadow'
+apply plugin: 'org.jetbrains.kotlin.jvm'
+apply plugin: 'kotlin'
 
 def loaderName = "neoforge"
 version = "${project.minecraft_version}-${project.mod_version}"
@@ -64,10 +67,12 @@ neoForge {
 dependencies {
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
     implementation group: "info.journeymap", name: "journeymap-api-neoforge", version: "${project.journeymap_api_version}-${project.minecraft_version}-SNAPSHOT", changing: true
+
     implementation group: 'io.javalin', name: 'javalin', version: project.javalin_version
+    shade group: 'info.journeymap', name: 'webmap-client', version: project.journeymap_webmap_version, changing: true
     additionalRuntimeClasspath group: 'io.javalin', name: 'javalin', version: project.javalin_version
 
-    shade group: 'info.journeymap', name: 'webmap-client', version: project.journeymap_webmap_version, changing: true
+    implementation group: 'org.jetbrains.kotlin', name: 'kotlin-stdlib', version: '2.1.20'
 
     //external libs shade
     shade group: 'io.javalin', name: 'javalin', version: project.javalin_version
@@ -95,6 +100,7 @@ shadowJar {
         exclude(dependency("org.slf4j:.*:.*"))
     }
 
+    relocate "kotlin", "info.journeymap.shaded.kotlin.kotlin"
     relocate "jakarta", "info.journeymap.shaded.jakarta"
     relocate "javax.servlet", "info.journeymap.shaded.org.javax.servlet"
     relocate "org.intellij", "info.journeymap.shaded.org.intellij"
