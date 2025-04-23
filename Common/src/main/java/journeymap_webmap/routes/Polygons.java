@@ -2,6 +2,7 @@ package journeymap_webmap.routes;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 import io.javalin.http.ContentType;
 import io.javalin.http.Context;
 import journeymap.api.client.impl.ClientAPI;
@@ -14,6 +15,7 @@ import journeymap.client.render.draw.DrawPolygonStep;
 import journeymap.client.render.draw.OverlayDrawStep;
 import net.minecraft.core.BlockPos;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -25,7 +27,17 @@ public class Polygons
 
     public static void polygonsGet(Context ctx)
     {
-        List<Object> data = new ArrayList<>();
+        Type dataType = new TypeToken<List<Map<String, String>>>()
+        {
+        }.getType();
+        Type pointsType = new TypeToken<List<Map<String, Integer>>>()
+        {
+        }.getType();
+
+        Type holesType = new TypeToken<List<List<Map<String, Integer>>>>()
+        {
+        }.getType();
+        List<Map<String, Object>> data = new ArrayList<>();
         List<OverlayDrawStep> steps = new ArrayList<>();
         UIState fullscreenState = ClientAPI.INSTANCE.getUIState(UI.Fullscreen);
         UIState minimapState = ClientAPI.INSTANCE.getUIState(UI.Minimap);
@@ -87,13 +99,13 @@ public class Polygons
                     put("textureScaleY", polygon.getShapeProperties().getTextureScaleY());
                     put("fontColor", RGB.toHexString(fontColor));
                     put("label", label);
-                    put("holes", holes);
-                    put("points", points);
+                    put("holes", GSON.toJsonTree(holes, holesType).getAsJsonArray());
+                    put("points", GSON.toJsonTree(points, pointsType).getAsJsonArray());
                 }});
             }
         }
 
         ctx.contentType(ContentType.APPLICATION_JSON);
-        ctx.result(GSON.toJson(data));
+        ctx.result(GSON.toJsonTree(data, dataType).getAsJsonArray().toString());
     }
 }
