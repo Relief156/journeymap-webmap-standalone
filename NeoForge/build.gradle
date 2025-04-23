@@ -233,7 +233,7 @@ tasks.modrinth.dependsOn(tasks.assemble)
 modrinth {
     token = "${modrinthApiKey}"
     projectId = modrinth_project_id
-    versionNumber = "${version}-forge"
+    versionNumber = "${version}-neoforge"
     versionName = "${project.mod_id}-${version}+${loaderName}"
     versionType = release_type
     uploadFile = shadowJar
