@@ -7,7 +7,7 @@ import io.javalin.http.Context;
 import journeymap.client.JourneymapClient;
 import journeymap.client.io.FileHandler;
 import journeymap.client.io.MapSaver;
-import journeymap.client.model.MapType;
+import journeymap.client.model.map.MapType;
 import journeymap.client.task.multi.MapRegionTask;
 import journeymap.client.task.multi.SaveMapTask;
 import journeymap.common.Journeymap;

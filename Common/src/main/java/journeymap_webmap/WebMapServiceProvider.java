@@ -21,4 +21,10 @@ public class WebMapServiceProvider implements WebMapService
     {
         return WebMap.getInstance().getPort();
     }
+
+    @Override
+    public String getVersion()
+    {
+        return "1.0.8";
+    }
 }

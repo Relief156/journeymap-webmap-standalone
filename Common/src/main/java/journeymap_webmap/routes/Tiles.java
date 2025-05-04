@@ -7,7 +7,7 @@ import journeymap.client.JourneymapClient;
 import journeymap.client.data.WorldData;
 import journeymap.client.io.FileHandler;
 import journeymap.client.io.RegionImageHandler;
-import journeymap.client.model.MapType;
+import journeymap.client.model.map.MapType;
 import journeymap.client.render.map.RegionTile;
 import journeymap.common.helper.DimensionHelper;
 import journeymap_webmap.WebMap;

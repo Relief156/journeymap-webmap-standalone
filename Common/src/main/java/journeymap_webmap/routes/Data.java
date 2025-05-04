@@ -7,7 +7,7 @@ import io.javalin.http.Context;
 import journeymap.api.v2.common.waypoint.Waypoint;
 import journeymap.client.data.DataCache;
 import journeymap.client.data.ImagesData;
-import journeymap.client.model.EntityDTO;
+import journeymap.client.model.entity.EntityDTO;
 import journeymap.client.waypoint.ClientWaypointImpl;
 import journeymap.common.Journeymap;
 import org.apache.logging.log4j.Logger;

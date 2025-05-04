@@ -5,6 +5,7 @@ import com.google.gson.GsonBuilder;
 import io.javalin.http.ContentType;
 import io.javalin.http.Context;
 import journeymap.client.JourneymapClient;
+import journeymap.client.model.map.MapState;
 import journeymap.client.ui.minimap.MiniMap;
 import journeymap_webmap.WebmapStatus;
 import net.minecraft.client.Minecraft;
@@ -36,7 +37,7 @@ public class Status
 
         if (status == WebmapStatus.READY)
         {
-            var mapState = MiniMap.state();
+            MapState mapState = MiniMap.state();
 
             data.put("mapType", mapState.getMapType().name());
 
