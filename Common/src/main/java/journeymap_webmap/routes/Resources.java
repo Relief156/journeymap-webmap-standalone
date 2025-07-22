@@ -33,7 +33,7 @@ public class Resources
         boolean close = false;
         String extension = resource != null ? resource.substring(resource.lastIndexOf('.') + 1) : null;
 
-        if (Minecraft.getInstance().level == null || !JourneymapClient.getInstance().isMapping())
+        if (Minecraft.getInstance().level == null || !JourneymapClient.getInstance().isMapping() || resource == null || "undefined".equals(resource))
         {
             ctx.result("");
             return;
@@ -105,7 +105,7 @@ public class Resources
         try
         {
             NativeImage img;
-            img = NativeImage.read(Resources.class.getResource(FileHandler.ASSETS_JOURNEYMAP_UI + "/img/marker-dot-32.png").openStream());
+            img = NativeImage.read(Resources.class.getResource(FileHandler.ASSETS_JOURNEYMAP_UI + "/img/marker-dot-160.png").openStream());
             return img;
         }
         catch (IOException e)

@@ -61,6 +61,7 @@ dependencies {
 
     //external libs shade
     shade group: 'io.javalin', name: 'javalin', version: project.javalin_version
+    shade group: 'org.slf4j', name: 'slf4j-simple', version: '2.0.16'
 
     testCompileOnly group: 'info.journeymap', name: 'journeymap-api-forge', version: "${project.journeymap_api_version}-${project.minecraft_version}-SNAPSHOT", changing: true
 
