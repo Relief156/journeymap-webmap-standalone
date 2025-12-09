@@ -27,3 +27,6 @@ jobs:
 
       - name: Modrinth Publish
         run: /bin/sh ./gradlew modrinth -Pmodrinth_api_key=${{ secrets.MODRINTH_KEY }} --stacktrace -x test
+
+      - name: CurseForge Publish
+        run: /bin/sh ./gradlew publishCurseForge -Pcurseforge_api_key=${{ secrets.CURSEFORGE_KEY }} --stacktrace -x test
