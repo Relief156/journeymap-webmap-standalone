@@ -114,6 +114,7 @@ plugins.withType(JavaPlugin) {
 //}
 
 jar {
+    dependsOn 'processDocs'
     from(rootProject.file('LICENSE')) {
         rename { "${it}_${base_name}" }
     }
