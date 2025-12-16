@@ -1,0 +1,136 @@
+import net.darkhax.curseforgegradle.TaskPublishCurseForge
+
+plugins {
+    id 'fabric-loom'
+    id 'multiloader-loader'
+    id 'net.darkhax.curseforgegradle' version '1.+'
+    id 'com.modrinth.minotaur' version '[2,3)'
+}
+
+dependencies {
+    minecraft "com.mojang:minecraft:${project.minecraft_version}"
+    mappings loom.layered() {
+        officialMojangMappings()
+    }
+
+    modCompileOnly group: 'info.journeymap', name: 'journeymap-api-fabric', version: "${project.journeymap_api_version}-${project.minecraft_version}-SNAPSHOT", changing: true
+    modImplementation "net.fabricmc:fabric-loader:${project.fabric_loader_version}"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+
+
+    implementation include(group: 'info.journeymap', name: 'webmap-client', version: project.journeymap_webmap_version, changing: true)
+    implementation include(group: 'io.javalin', name: 'javalin', version: project.javalin_version)
+    //external libs shade
+    compileOnly include(group: 'org.eclipse.jetty', name: 'jetty-server', version: '11.0.25')
+    compileOnly include(group: 'org.eclipse.jetty', name: 'jetty-servlet', version: '11.0.25')
+    compileOnly include(group: 'org.eclipse.jetty', name: 'jetty-webapp', version: '11.0.25')
+    compileOnly include(group: 'org.eclipse.jetty', name: 'jetty-security', version: '11.0.25')
+    compileOnly include(group: 'org.eclipse.jetty', name: 'jetty-io', version: '11.0.25')
+    compileOnly include(group: 'org.eclipse.jetty', name: 'jetty-http', version: '11.0.25')
+    compileOnly include(group: 'org.eclipse.jetty', name: 'jetty-util', version: '11.0.25')
+    compileOnly include(group: 'org.eclipse.jetty', name: 'jetty-webapp', version: '11.0.25')
+    compileOnly include(group: 'org.eclipse.jetty', name: 'jetty-xml', version: '11.0.25')
+    compileOnly include(group: 'jakarta.servlet', name: 'jakarta.servlet-api', version: '6.1.0')
+    compileOnly include(group: 'org.eclipse.jetty.toolchain', name: 'jetty-jakarta-servlet-api', version: '5.0.2')
+    compileOnly include(group: 'org.jetbrains.kotlin', name: 'kotlin-stdlib', version: '2.2.21')
+
+//    compileOnly include (group: 'org.slf4j', name: 'slf4j-simple', version: '2.0.3')
+}
+
+loom {
+    if (project(":common").file("src/main/resources/journeymap_webmap.accesswidener").exists()) {
+        accessWidenerPath.set(project(":common").file("src/main/resources/journeymap_webmap.accesswidener"))
+    }
+
+    runs {
+        client {
+            client()
+            setConfigName("Fabric Client")
+            ideConfigGenerated(true)
+            runDir("run/client")
+            programArg("--username=Dev")
+        }
+        server {
+            server()
+            setConfigName("Fabric Server")
+            ideConfigGenerated(true)
+            runDir("run/server")
+        }
+    }
+}
+
+//sourceSets {
+//    main.kotlin.srcDirs = ['src/main/java', 'src/main/kotlin']
+//}
+
+remapJar {
+    archiveClassifier.set("")
+}
+
+artifacts {
+    archives remapJar
+}
+
+// Automated upload to CurseForge for the win!
+if (!project.hasProperty("curseForgeApiKey")) {
+    ext.curseForgeApiKey = project.findProperty("curseforge_api_key") ?: "notset"
+}
+if (!project.hasProperty("modrinthApiKey")) {
+    ext.modrinthApiKey = project.findProperty("modrinth_api_key") ?: "notset"
+}
+
+tasks.register("publishCurseForge", TaskPublishCurseForge) {
+    apiToken = "${curseForgeApiKey}"
+    def mainFile = upload(curseforge_project_id, remapJar)
+    mainFile.displayName = "${project.mod_id}-${version}+${project.name}"
+    mainFile.releaseType = release_type
+    mainFile.addModLoader("Fabric", "Quilt")
+    mainFile.addJavaVersion("Java 21")
+    mainFile.addGameVersion("${project.minecraft_version}", "1.21.11")
+    mainFile.addRelation("journeymap", "requiredDependency")
+    mainFile.changelogType = "html"
+    mainFile.changelog = file("$project.buildDir/doc/changelog.html")
+}
+
+tasks.modrinth.dependsOn(tasks.build)
+
+modrinth {
+    token = "${modrinthApiKey}"
+    projectId = modrinth_project_id
+    versionNumber = "${version}+${project.name}"
+    versionName = "${project.mod_id}-${version}+${project.name}"
+    versionType = release_type
+    uploadFile = remapJar
+    gameVersions = ["${project.minecraft_version}", "1.21.11"]
+    loaders = ["fabric", "quilt"]
+    changelog = file("/build/doc/changelog.html").exists() ? file("/build/doc/changelog.html").text : null
+    dependencies {
+        required.project "journeymap"
+    }
+}
+
+
+tasks.withType(PublishToMavenRepository) { task -> task.dependsOn remapJar }
+
+publishing {
+    repositories {
+        maven {
+            name = "JourneyMap"
+            url = uri("https://jm.gserv.me/repository/maven-releases/")
+
+            credentials {
+                username = project.findProperty("journeymap.user") ?: System.getenv("JOURNEYMAP_WEB_USER")
+                password = project.findProperty("journeymap.password") ?: System.getenv("JOURNEYMAP_WEB_PASSWORD")
+            }
+        }
+    }
+
+    publications {
+        mavenJava(MavenPublication) {
+            groupId project.group
+            artifactId base.archivesName.get()
+            version "${project.version}"
+            artifact remapJar
+        }
+    }
+}

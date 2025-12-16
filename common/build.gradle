@@ -1,21 +1,7 @@
 plugins {
-    id 'idea'
-    id 'java'
     id 'net.neoforged.moddev'
-    id 'maven-publish'
+    id 'multiloader-common'
 }
-
-
-version = "${project.mod_version}+${project.minecraft_version}"
-def modVersion = "${project.mod_version}"
-
-group = project.group_id
-archivesBaseName = project.base_name
-
-configurations {
-    shade
-}
-
 
 neoForge {
     neoFormVersion = neo_form_version
@@ -39,17 +25,4 @@ dependencies {
     // for annotations
     implementation group: 'com.google.code.findbugs', name: 'jsr305', version: '3.0.1'
     implementation group: 'io.javalin', name: 'javalin', version: project.javalin_version
-}
-
-task processDocs(type: Copy) {
-    // update docs
-    from(file("/doc/")) {
-        include '*.html'
-        expand 'version': project.version,
-                'date': getDate(),
-                'mcversion': project.minecraft_version,
-                'loaderversion': project.forge_version,
-                'loadername': "Forge"
-    }
-    into 'build/doc'
 }

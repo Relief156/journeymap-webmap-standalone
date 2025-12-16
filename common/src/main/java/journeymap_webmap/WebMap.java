@@ -13,7 +13,7 @@ import journeymap_webmap.routes.Skin;
 import journeymap_webmap.routes.Status;
 import journeymap_webmap.routes.Tiles;
 import journeymap_webmap.routes.Waypoints;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -87,7 +87,7 @@ public class WebMap
                             if (!dir.exists())
                             {
                                 logger.info("Attempting to copy web content to {}", new File(Constants.JOURNEYMAP_DIR, "web"));
-                                boolean created = FileHandler.copyResources(dir, ResourceLocation.fromNamespaceAndPath(MOD_ID, "web"), "", false);
+                                boolean created = FileHandler.copyResources(dir, Identifier.fromNamespaceAndPath(MOD_ID, "web"), "", false);
                                 logger.info("Web content copied successfully: {}", created);
                             }
 
@@ -116,6 +116,7 @@ public class WebMap
                     .get("/status", Status::statusGet)
                     .get("/tiles/tile.png", Tiles::tilesGet);
             app.start(port);
+
         }
         catch (Exception e)
         {

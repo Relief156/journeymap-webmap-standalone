@@ -9,7 +9,8 @@ import journeymap.client.texture.TextureCache;
 import journeymap.common.Journeymap;
 import journeymap_webmap.Constants;
 import net.minecraft.client.Minecraft;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.renderer.texture.DynamicTexture;
+import net.minecraft.resources.Identifier;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.jetty.io.EofException;
 
@@ -29,7 +30,7 @@ public class Resources
     {
         NativeImage img;
         String resource = ctx.queryParam("resource");
-        ResourceLocation resourceLocation = resource != null ? ResourceLocation.parse(resource) : null;
+        Identifier identifier = resource != null ? Identifier.parse(resource) : null;
         boolean close = false;
         String extension = resource != null ? resource.substring(resource.lastIndexOf('.') + 1) : null;
 
@@ -44,19 +45,19 @@ public class Resources
             extension = extension.split(":")[0];
         }
 
-        if ("fake".equals(resourceLocation != null ? resourceLocation.getNamespace() : null))
+        if ("fake".equals(identifier != null ? identifier.getNamespace() : null))
         {
-            img = TextureCache.getTexture(resourceLocation).getPixels();
+            img = ((DynamicTexture)TextureCache.getTexture(identifier)).getPixels();
         }
         else
         {
             try
             {
-                img = MobIconCache.getWebMapIcon(resourceLocation).getPixels();
+                img = MobIconCache.getWebMapIcon(identifier).getPixels();
                 if (img == null)
                 {
                     close = true;
-                    img = NativeImage.read(Constants.getResourceAsStream(resourceLocation));
+                    img = NativeImage.read(Constants.getResourceAsStream(identifier));
                 }
             }
             catch (FileNotFoundException | NullPointerException e)
