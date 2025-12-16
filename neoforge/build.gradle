@@ -132,7 +132,7 @@ tasks.register("publishCurseForge", TaskPublishCurseForge) {
     mainFile.releaseType = release_type
     mainFile.addModLoader("NeoForge")
     mainFile.addJavaVersion("Java 21")
-    mainFile.addGameVersion("${project.minecraft_version}", "1.21.11")
+    mainFile.addGameVersion("${project.minecraft_version}")
     mainFile.addRelation("journeymap", "requiredDependency")
     mainFile.changelogType = "html"
     mainFile.changelog = file("$project.buildDir/doc/changelog.html")
@@ -148,7 +148,7 @@ modrinth {
     versionName = "${project.mod_id}-${version}+${project.name}"
     versionType = release_type
     uploadFile = shadowJar
-    gameVersions = ["${project.minecraft_version}", "1.21.11"]
+    gameVersions = ["${project.minecraft_version}"]
     loaders = ["neoforge"]
     changelog = file('/build/doc/changelog.html').exists() ? file('/build/doc/changelog.html').text : null
     dependencies {
