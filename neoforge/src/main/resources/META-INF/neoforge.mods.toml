@@ -5,7 +5,7 @@ license="All rights reserved"
 
 [[mods]]
 modId="journeymap_webmap"
-version="${modVersion}"
+version="${version}"
 displayName="JourneyMap WebMap"
 updateJSONURL="https://forge.curseupdate.com/793035/journeymap-web-map"
 displayURL="http://journeymap.info"

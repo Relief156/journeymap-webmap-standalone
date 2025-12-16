@@ -1,61 +1,29 @@
-buildscript {
-    dependencies {
-        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '6.0.23+', changing: true
-        classpath("io.github.goooler.shadow:shadow-gradle-plugin:8.1.7")
-        classpath 'org.parchmentmc:librarian:1.+'
-        classpath 'org.spongepowered:mixingradle:0.7.+'
-        classpath group: 'com.modrinth.minotaur', name: 'Minotaur', version: '2.+'
-        classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:2.1.20'
-    }
-}
+import net.darkhax.curseforgegradle.TaskPublishCurseForge
 
 plugins {
-    id 'idea'
-    id 'net.minecraftforge.gradle' version '[6.0,6.2)'
-    id 'org.spongepowered.mixin' version '0.7-SNAPSHOT'
-    id 'net.darkhax.curseforgegradle' version '1.+'
+    id 'multiloader-loader'
+    id 'net.minecraftforge.accesstransformers' version '5.0.2'
+    id 'net.minecraftforge.gradle' version '7.0.0-beta.55'
+    id "net.darkhax.curseforgegradle" version "1.+"
+    id "com.modrinth.minotaur" version "2.+"
+    id 'com.gradleup.shadow'
 }
 
-apply plugin: 'org.jetbrains.kotlin.jvm'
-apply plugin: 'kotlin'
-apply plugin: 'io.github.goooler.shadow'
-apply plugin: 'org.parchmentmc.librarian.forgegradle'
-apply plugin: "com.modrinth.minotaur"
-apply plugin: "maven-publish"
-
-def loaderName = "forge"
-version = "${project.minecraft_version}-${project.mod_version}"
-def modVersion = "${project.mod_version}"
-
-group = project.group_id
-archivesBaseName = "${project.base_name}-${loaderName}"
-
+repositories {
+    maven minecraft.mavenizer
+    maven fg.forgeMaven
+    maven fg.minecraftLibsMaven
+    mavenCentral()
+}
 configurations {
     shade
 }
 
-configurations.all {
-    // Check for snapshots more frequently than Gradle's default of 1 day. 0 = every build.
-    resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
-}
-
-//jarJar.enable()
-//
-//tasks.jarJar.configure {
-//    archiveClassifier.set("")
-//}
-//tasks.named("assemble").configure {
-//    dependsOn("jarJar")
-//}
-
-minecraft.reobf = false
 dependencies {
-    minecraft "net.minecraftforge:forge:${project.minecraft_version}-${project.forge_version}"
-    annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
-    implementation("net.sf.jopt-simple:jopt-simple:5.0.4") { version { strictly "5.0.4" } }
-
+    implementation minecraft.dependency("net.minecraftforge:forge:${minecraft_version}-${forge_version}")
+    annotationProcessor 'net.minecraftforge:eventbus-validator:7.0-beta.10'
     compileOnly group: 'info.journeymap', name: 'journeymap-api-forge', version: "${project.journeymap_api_version}-${project.minecraft_version}-SNAPSHOT", changing: true
-    implementation group: 'org.jetbrains.kotlin', name: 'kotlin-stdlib', version: '2.1.20'
+    implementation group: 'org.jetbrains.kotlin', name: 'kotlin-stdlib', version: '2.2.21'
 
     shade group: 'info.journeymap', name: 'webmap-client', version: project.journeymap_webmap_version, changing: true
 
@@ -65,64 +33,34 @@ dependencies {
 
     testCompileOnly group: 'info.journeymap', name: 'journeymap-api-forge', version: "${project.journeymap_api_version}-${project.minecraft_version}-SNAPSHOT", changing: true
 
-    compileOnly project(":common")
-}
-
-mixin {
-    add sourceSets.main, "journeymap-refmap.json"
 }
 
 minecraft {
-    mappings channel: "official", version: "${project.minecraft_version}"
+    mappings channel: project.mappings_channel, version: "${project.mappings_mc_version}-${project.mappings_date}"
 
-    copyIdeResources = true //Calls processResources when in dev
-
-    if (file("src/main/resources/META-INF/accesstransformer.cfg").exists()) {
-        accessTransformer = file("src/main/resources/META-INF/accesstransformer.cfg")
-    }
+    accessTransformers = '../../../../common/src/main/resources/META-INF/accesstransformer.cfg'
 
     runs {
-        client = {
-            // needed for deps with mixins.
-            property "mixin.debug.export", "true"
-            property "mixin.env.remapRefMap", "true"
-            property "mixin.env.refMapRemappingFile", "${buildDir}/createSrgToMcp/output.srg"
-            properties "forge.logging.console.level": "info"
-            properties "journeymap.map_testing": "true"
-
-
-            workingDirectory project.file("run/client")
-            mods {
-                modClientRun {
-                    source sourceSets.main
-                    source project(":common").sourceSets.main
-                }
-            }
+        configureEach {
+            systemProperty 'forge.logging.console.level', 'debug'
+            systemProperty 'eventbus.api.strictRuntimeChecks', 'true'
         }
-        server = {
-            arg "nogui"
-            property "mixin.debug.export", "true"
-            property "mixin.env.remapRefMap", "true"
-            property "mixin.env.refMapRemappingFile", "${buildDir}/createSrgToMcp/output.srg"
-            properties "forge.logging.console.level": "info"
-            properties "mixin.env.disableRefMap": "true"
-            properties "forge.logging.markers": "SCAN,REGISTRIES,REGISTRYDUMP"
-            workingDirectory project.file("run/server")
-            mods {
-                modServerRun {
-                    source sourceSets.main
-                    source project(":common").sourceSets.main
-                }
-            }
+        register('client') {
+            workingDir.convention layout.projectDirectory.dir("run/client")
+        }
+        register('server') {
+            workingDir.convention layout.projectDirectory.dir("run/server")
+            args "nogui"
         }
     }
 }
-
-minecraft.runs.all {
-    lazyToken('minecraft_classpath') {
-        configurations.library.copyRecursive().resolve().collect { it.absolutePath }.join(File.pathSeparator)
-    }
-}
+//sourceSets.main.resources.srcDir 'src/generated/resources'
+//
+//sourceSets.each {
+//    def dir = layout.buildDirectory.dir("sourcesSets/$it.name")
+//    it.output.resourcesDir = dir
+//    it.java.destinationDirectory = dir
+//}
 
 
 shadowJar {
@@ -156,94 +94,13 @@ shadowJar {
     exclude 'LICENSE.txt'
 }
 
-tasks.withType(JavaCompile) {
-    source(project(":common").sourceSets.main.allSource)
-    options.encoding = "UTF-8"
-}
-
-
-// This block of code expands all the gradle properties in the specified resource targets.
-// It copies them into the targets and expands all the defined properties.
-def resourceTargets = ['META-INF/mods.toml', 'pack.mcmeta', 'license.txt']
-def intoTargets = ["$rootDir/out/production/resources/", "$rootDir/out/production/${project.name}.main/", "$rootDir/bin/main/"]
-def replaceProperties = [
-        version     : project.version,
-        modVersion  : modVersion,
-        mcversion   : project.minecraft_version,
-        date        : getDate()
-]
-
-processResources() {
-    from project(":common").sourceSets.main.resources
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    //    duplicatesStrategy = DuplicatesStrategy.INCLUDE
-    // this will ensure that this task is redone when the versions change.
-    inputs.properties replaceProperties
-    filesMatching(resourceTargets) {
-        expand replaceProperties
-    }
-
-    intoTargets.each { target ->
-        if (file(target).exists()) {
-            copy {
-                from(sourceSets.main.resources) {
-                    include resourceTargets
-                    expand replaceProperties
-                }
-                into target
-            }
-        }
-    }
-}
-
-task processDocs(type: Copy) {
-    // update docs
-    from(file("../doc/")) {
-        include '*.html'
-        expand 'version': project.version,
-                'date': getDate(),
-                'mcversion': project.minecraft_version,
-                'loaderversion': project.forge_version,
-                'loadername': "Forge"
-    }
-    into 'build/doc'
-}
 
 tasks.assemble.dependsOn shadowJar
-
-clean.doFirst {
-    // Remove the Webpack bundled assets as part of the clean task
-    delete "$projectDir/src/main/resources/assets/journeymap/web/"
-}
-
-jar {
-    archiveClassifier.set('slim')
-    dependsOn 'processDocs'
-    manifest {
-        attributes([
-                "Specification-Title"     : project.name,
-                "Specification-Vendor"    : project.group_id,
-                "Specification-Version"   : "1", // We are version 1 of ourselves
-                "Implementation-Title"    : project.name,
-                "Implementation-Version"  : "${version}",
-                "Implementation-Vendor"   : project.group_id,
-                "Implementation-URL"      : "http://journeymap.info",
-                "Implementation-Timestamp": getDate(),
-                "FMLAT"                   : "accesstransformer.cfg",
-        ])
-    }
-}
-
 
 artifacts {
     archives shadowJar
 }
 
-def getDate() {
-    def date = new Date()
-    def formattedDate = date.format(project.dateFormat)
-    return formattedDate
-}
 
 // Automated upload to CurseForge for the win!
 if (!project.hasProperty("curseForgeApiKey")) {
@@ -253,15 +110,14 @@ if (!project.hasProperty("modrinthApiKey")) {
     ext.modrinthApiKey = project.findProperty("modrinth_api_key") ?: "notset"
 }
 
-task publishCurseForge(type: net.darkhax.curseforgegradle.TaskPublishCurseForge) {
-
+tasks.register("publishCurseForge", TaskPublishCurseForge) {
     apiToken = "${curseForgeApiKey}"
     def mainFile = upload(curseforge_project_id, shadowJar)
-    mainFile.displayName = "${project.mod_id}-${version}+${loaderName}"
+    mainFile.displayName = "${project.mod_id}-${version}+${project.name}"
     mainFile.releaseType = release_type
     mainFile.addModLoader("Forge")
     mainFile.addJavaVersion("Java 21")
-    mainFile.addGameVersion("${project.minecraft_version}", "1.21.1", "1.21.5", "1.21.8")
+    mainFile.addGameVersion("${project.minecraft_version}", "1.21.11")
     mainFile.addRelation("journeymap", "requiredDependency")
     mainFile.changelogType = "html"
     mainFile.changelog = file("$project.buildDir/doc/changelog.html")
@@ -273,10 +129,10 @@ modrinth {
     token = "${modrinthApiKey}"
     projectId = modrinth_project_id
     versionNumber = "${version}-forge"
-    versionName = "${project.mod_id}-${version}+${loaderName}"
+    versionName = "${project.mod_id}-${version}+${project.name}"
     versionType = release_type
     uploadFile = shadowJar
-    gameVersions = ["${project.minecraft_version}", "1.21.1", "1.21.5", "1.21.8"]
+    gameVersions = ["${project.minecraft_version}", "1.21.11"]
     loaders = ["forge"]
     changelog = file('/build/doc/changelog.html').exists() ? file('/build/doc/changelog.html').text : null
     dependencies {
@@ -284,15 +140,6 @@ modrinth {
     }
 }
 
-// Ensure build is done prior to cursegradle tasks
-project.afterEvaluate {
-    project.tasks.findAll { task ->
-        (task.name.startsWith('curseforge') || task.name.startsWith('modrinth'))
-                && (task.name != 'curseforge' || task.name != 'modrinth')
-    }.each { projectTask ->
-        projectTask.dependsOn build
-    }
-}
 tasks.withType(PublishToMavenRepository) { task ->
     task.dependsOn shadowJar
 }
@@ -316,7 +163,7 @@ publishing {
     publications {
         mavenJava(MavenPublication) {
             groupId project.group
-            artifactId project.archivesBaseName
+            artifactId base.archivesName.get()
             version "${project.version}-forge"
             artifact shadowJar
         }
