@@ -1,0 +1,22 @@
+{
+  "id": "白桦_363-42-2313",
+  "name": "白桦",
+  "icon": "journeymap:ui/img/waypoint-icon.png",
+  "colorizedIcon": "fake:color--3289651-waypoint-icon.png",
+  "x": 363,
+  "y": 42,
+  "z": 2313,
+  "r": 205,
+  "g": 205,
+  "b": 205,
+  "enable": false,
+  "type": "Normal",
+  "origin": "journeymap",
+  "dimensions": [
+    "minecraft:overworld"
+  ],
+  "persistent": true,
+  "showDeviation": false,
+  "iconColor": -1,
+  "customIconColor": false
+}
